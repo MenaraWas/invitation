@@ -1,18 +1,22 @@
 <?php
 
+namespace App\Filament\Pages;
+
 use App\Models\InvitationSetting;
+use BackedEnum;
 use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Schemas\Schema;
 use Filament\Pages\Page;
 use Filament\Notifications\Notification;
+use Filament\Support\Icons\Heroicon;
 
 class ManageInvitationSettings extends Page implements Forms\Contracts\HasForms
 {
     use Forms\Concerns\InteractsWithForms;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cog';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog;
     protected static ?string $navigationLabel = 'Pengaturan Undangan';
-    protected static string $view = 'filament.pages.manage-invitation-settings';
+    protected string $view = 'filament.pages.manage-invitation-settings';
 
     public ?array $data = [];
 
@@ -21,9 +25,9 @@ class ManageInvitationSettings extends Page implements Forms\Contracts\HasForms
         $this->form->fill(InvitationSetting::current()->toArray());
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $form): Schema
     {
-        return $form->schema([
+        return $form->components([
             Forms\Components\Select::make('content_type')
                 ->options([
                     'website' => 'Website',

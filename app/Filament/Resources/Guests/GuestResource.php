@@ -92,7 +92,7 @@ class GuestResource extends Resource
                     ->url(function (Guest $record) {
                         $link = route('invitation.show', $record->token);
                         $message = "Halo {$record->name}, berikut undangan pernikahan kami:\n{$link}";
-                        $phone = preg_replace('/[^0-9]/', '', $record->phone_number);
+                        $phone = preg_replace('/[^0-9]/', '', $record->phone);
 
                         return "https://wa.me/{$phone}?text=" . urlencode($message);
                     })

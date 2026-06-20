@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Guest;
 use App\Models\DeviceSession;
+use App\Models\InvitationSetting;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use Carbon\Carbon;
@@ -49,7 +50,7 @@ class InvitationController extends Controller
         if ($existing) {
             if ($existing->fingerprint_hash === $fingerprint) {
                 $existing->update(['last_accessed_at' => now()]);
-                return response()->json(['allowed' => true]);
+                return $this->successResponse();
             }
 
             return response()->json(['allowed' => false, 'reason' => 'device_mismatch'], 403);
@@ -66,17 +67,31 @@ class InvitationController extends Controller
                 'last_accessed_at' => now(),
             ]);
 
-            return response()->json(['allowed' => true]);
+            return $this->successResponse();
         } catch (QueryException $e) {
             // Race condition: device session udah ke-create sama request lain
             // di waktu yang nyaris bersamaan. Re-fetch dan cek ulang.
             $existing = $guest->fresh()->deviceSession;
 
             if ($existing && $existing->fingerprint_hash === $fingerprint) {
-                return response()->json(['allowed' => true]);
+                return $this->successResponse();
             }
 
             return response()->json(['allowed' => false, 'reason' => 'device_mismatch'], 403);
         }
+    }
+
+    /**
+     * Response sukses dengan data content dari InvitationSetting.
+     */
+    private function successResponse(): \Illuminate\Http\JsonResponse
+    {
+        $setting = InvitationSetting::current();
+
+        return response()->json([
+            'allowed' => true,
+            'content_url' => $setting->content_url,
+            'content_type' => $setting->content_type,
+        ]);
     }
 }

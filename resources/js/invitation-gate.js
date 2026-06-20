@@ -31,6 +31,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadingEl.style.display = 'none';
 
         if (data.allowed) {
+
+            const container = document.getElementById('content-container');
+
+            if (data.content_type === 'image') {
+                container.innerHTML = `<img src="${data.content_url}" style="width:100%;display:block">`;
+            } else {
+                container.innerHTML = `<iframe src="${data.content_url}" style="width:100%;height:100vh;border:none"></iframe>`;
+            }
+
             contentEl.style.display = 'block';
         } else {
             deniedEl.style.display = 'block';
