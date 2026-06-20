@@ -17,7 +17,7 @@ class Guest extends Model
         'rsvp_status',
     ];
 
-    public function deviceSessions()
+    public function deviceSession()
     {
         return $this->hasOne(DeviceSession::class);
     }
@@ -28,5 +28,13 @@ class Guest extends Model
         }while (self::where('token', $token)->exists());
         
         return $token;
+    }
+
+    protected static function booted(){
+        static::creating(function ($guest) {
+        if (empty($guest->token)) {
+            $guest->token = self::generateToken();
+        }
+    });
     }
 }
