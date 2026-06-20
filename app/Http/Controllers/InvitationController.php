@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Guest;
 use App\Models\DeviceSession;
+use Illuminate\Http\Request;
+use Illuminate\Database\QueryException;
 use Carbon\Carbon;
 
 class InvitationController extends Controller
@@ -44,8 +45,18 @@ class InvitationController extends Controller
 
         $fingerprint = $request->input('fingerprint');
         $existing = $guest->deviceSession;
-        if (!$existing) {
-            // Kunjungan pertama, lock device ini
+
+        if ($existing) {
+            if ($existing->fingerprint_hash === $fingerprint) {
+                $existing->update(['last_accessed_at' => now()]);
+                return response()->json(['allowed' => true]);
+            }
+
+            return response()->json(['allowed' => false, 'reason' => 'device_mismatch'], 403);
+        }
+
+        // Belum ada device session, coba insert
+        try {
             DeviceSession::create([
                 'guest_id' => $guest->id,
                 'fingerprint_hash' => $fingerprint,
@@ -56,14 +67,16 @@ class InvitationController extends Controller
             ]);
 
             return response()->json(['allowed' => true]);
-        }
+        } catch (QueryException $e) {
+            // Race condition: device session udah ke-create sama request lain
+            // di waktu yang nyaris bersamaan. Re-fetch dan cek ulang.
+            $existing = $guest->fresh()->deviceSession;
 
-        if ($existing->fingerprint_hash === $fingerprint) {
-            $existing->update(['last_accessed_at' => now()]);
-            return response()->json(['allowed' => true]);
-        }
+            if ($existing && $existing->fingerprint_hash === $fingerprint) {
+                return response()->json(['allowed' => true]);
+            }
 
-        // Fingerprint beda, tolak
-        return response()->json(['allowed' => false, 'reason' => 'device_mismatch'], 403);
+            return response()->json(['allowed' => false, 'reason' => 'device_mismatch'], 403);
+        }
     }
 }

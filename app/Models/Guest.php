@@ -22,7 +22,7 @@ class Guest extends Model
         return $this->hasOne(DeviceSession::class);
     }
 
-    public function generateToken(){
+    public static function generateToken(){
         do{
             $token = Str::random(32);
         }while (self::where('token', $token)->exists());
