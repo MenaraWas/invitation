@@ -1,0 +1,7 @@
+<x-filament-panels::page>
+    {{-- Page content --}}
+    <form wire:submit="save">
+        {{ $this->form }}
+        <x-filament::button type="submit" class="mt-4">Simpan</x-filament::button>
+    </form>
+</x-filament-panels::page>
