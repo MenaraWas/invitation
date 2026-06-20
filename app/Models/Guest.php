@@ -4,9 +4,29 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Str;
 
 class Guest extends Model
 {
     /** @use HasFactory<\Database\Factories\GuestFactory> */
-    use HasFactory;
+    protected $fillable = [
+        'name',
+        'phone',
+        'token',
+        'status',
+        'rsvp_status',
+    ];
+
+    public function deviceSessions()
+    {
+        return $this->hasOne(DeviceSession::class);
+    }
+
+    public function generateToken(){
+        do{
+            $token = Str::random(32);
+        }while (self::where('token', $token)->exists());
+        
+        return $token;
+    }
 }

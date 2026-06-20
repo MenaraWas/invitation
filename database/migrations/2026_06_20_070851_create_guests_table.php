@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('guests', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->string('phone')->nullable();
+            $table->string('token', 64)->unique();
+            $table->enum('status', ['active', 'revoked'])->default('active');
+            $table->enum('rsvp_status', ['pending', 'attending', 'not_attending'])->default('pending');
             $table->timestamps();
         });
     }

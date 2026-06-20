@@ -13,7 +13,14 @@ return new class extends Migration
     {
         Schema::create('device_sessions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('guest_id')->unique()->constrained()->cascadeOnDelete();
+            $table->string('fingerprint_hash');
+            $table->string('user_agent')->nullable();
+            $table->string('ip_address')->nullable();
+            $table->timestamp('first_accessed_at');
+            $table->timestamp('last_accessed_at');
             $table->timestamps();
+
         });
     }
 
