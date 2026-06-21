@@ -12,6 +12,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const verifyUrl = contentEl.dataset.verifyUrl;
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
+    /**
+     * Fade out an element and fade in another.
+     */
+    function showState(hideEl, showEl) {
+        hideEl.classList.add('is-hidden');
+        hideEl.classList.remove('is-visible');
+        setTimeout(() => {
+            hideEl.style.display = 'none';
+            showEl.style.display = '';
+            showEl.classList.remove('is-hidden');
+            showEl.classList.add('is-visible');
+        }, 400); // match CSS transition duration
+    }
+
     try {
         const fp = await FingerprintJS.load();
         const result = await fp.get();
@@ -28,25 +42,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const data = await response.json();
 
-        loadingEl.style.display = 'none';
-
         if (data.allowed) {
-
             const container = document.getElementById('content-container');
 
             if (data.content_type === 'image') {
-                container.innerHTML = `<img src="${data.content_url}" style="width:100%;display:block">`;
+                container.innerHTML = `<img src="${data.content_url}" style="width:100%;display:block" alt="Undangan">`;
             } else {
-                container.innerHTML = `<iframe src="${data.content_url}" style="width:100%;height:100vh;border:none"></iframe>`;
+                container.innerHTML = `<iframe src="${data.content_url}" style="width:100%;height:100vh;border:none" title="Undangan"></iframe>`;
             }
 
-            contentEl.style.display = 'block';
+            showState(loadingEl, contentEl);
         } else {
-            deniedEl.style.display = 'block';
+            showState(loadingEl, deniedEl);
         }
     } catch (error) {
-        loadingEl.style.display = 'none';
-        deniedEl.style.display = 'block';
-        deniedEl.textContent = 'Terjadi kesalahan. Silakan hubungi panitia.';
+        showState(loadingEl, deniedEl);
     }
 });
