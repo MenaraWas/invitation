@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\InvitationSetting;
 use BackedEnum;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
 use Filament\Schemas\Schema;
 use Filament\Pages\Page;
 use Filament\Notifications\Notification;
@@ -28,6 +29,11 @@ class ManageInvitationSettings extends Page implements Forms\Contracts\HasForms
     public function form(Schema $form): Schema
     {
         return $form->components([
+            DatePicker::make('event_date')
+                ->label('Tanggal Acara')
+                ->required()
+                ->helperText('Undangan tidak bisa diakses 1 hari setelah tanggal'),
+
             Forms\Components\Select::make('content_type')
                 ->options([
                     'website' => 'Website',

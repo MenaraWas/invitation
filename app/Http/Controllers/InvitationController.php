@@ -18,8 +18,9 @@ class InvitationController extends Controller
             return view('invitation.invalid');
         }
 
-        $eventDeadline = Carbon::parse(config('app.event_date'))->addDay();
-        if (now()->greaterThan($eventDeadline)) {
+        $eventDeadline = InvitationSetting::current()->event_date?->copy()->addDay();
+
+        if (!$eventDeadline || now()->greaterThan($eventDeadline)) {
             return view('invitation.expired');
         }
 

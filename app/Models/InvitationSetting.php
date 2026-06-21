@@ -10,6 +10,7 @@ class InvitationSetting extends Model
     protected $fillable = [
         'content_url',
         'content_type',
+        'event_date',
     ];
 
     public static function current():self {

@@ -123,6 +123,5 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    'event_date' => env('INVITATION_EVENT_DATE', '2026-12-31'),
 
 ];
