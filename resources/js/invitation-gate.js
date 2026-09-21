@@ -43,15 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = await response.json();
 
         if (data.allowed) {
-            const container = document.getElementById('content-container');
-
-            if (data.content_type === 'image') {
-                container.innerHTML = `<img src="${data.content_url}" style="width:100%;display:block" alt="Undangan">`;
-            } else {
-                container.innerHTML = `<iframe src="${data.content_url}" style="width:100%;height:100vh;border:none" title="Undangan"></iframe>`;
-            }
-
-            showState(loadingEl, contentEl);
+            window.location.replace(data.content_url);
         } else {
             showState(loadingEl, deniedEl);
         }
