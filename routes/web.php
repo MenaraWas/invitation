@@ -8,6 +8,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/login', fn () => redirect('/admin/login'))->name('login');
+
 Route::get('/wa-status', [WhatsAppStatusController::class, 'index'])
     ->middleware('auth')
     ->name('wa.status');
