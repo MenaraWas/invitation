@@ -26,6 +26,24 @@
             </div>
         @endif
 
+        @auth
+            <form method="POST" action="{{ route('wa.status.reset') }}" class="mt-6">
+                @csrf
+                <button type="submit" class="w-full rounded-xl bg-red-600 px-4 py-3 font-semibold text-white hover:bg-red-700"
+                    onclick="return confirm('Reset akan memutus WhatsApp yang sedang terhubung dan membuat QR baru. Lanjutkan?')">
+                    Reset WhatsApp Terhubung
+                </button>
+            </form>
+        @endauth
+
+        @if (session('success'))
+            <div class="mt-4 rounded-xl bg-green-50 border border-green-200 p-4 text-green-700">{{ session('success') }}</div>
+        @endif
+
+        @if (session('error'))
+            <div class="mt-4 rounded-xl bg-red-50 border border-red-200 p-4 text-red-700">{{ session('error') }}</div>
+        @endif
+
         <div class="mt-6 text-sm text-gray-500">
             Service WA: <span class="font-medium text-gray-700">http://localhost:3001</span>
         </div>

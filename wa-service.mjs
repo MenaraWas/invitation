@@ -1,4 +1,5 @@
 import express from 'express';
+import { rm } from 'node:fs/promises';
 import QRCode from 'qrcode';
 import cors from 'cors';
 import { Boom } from '@hapi/boom';
@@ -31,6 +32,7 @@ app.use(express.json());
 let qrCode = null;
 let sock = null;
 let isConnected = false;
+let isResetting = false;
 
 async function startWa() {
   const { state, saveCreds } = await useMultiFileAuthState(SESSION_DIR);
@@ -68,7 +70,7 @@ async function startWa() {
       const shouldReconnect = (lastDisconnect?.error || new Boom('Unknown error')).output?.statusCode !== DisconnectReason.loggedOut;
       isConnected = false;
 
-      if (shouldReconnect) {
+      if (shouldReconnect && !isResetting) {
         startWa();
       }
     }
@@ -87,6 +89,33 @@ app.get('/wa/status', (req, res) => {
     qr: qrCode,
     sessionDir: SESSION_DIR,
   });
+});
+
+app.post('/wa/reset', async (req, res) => {
+  if (isResetting) {
+    return res.status(409).json({ error: 'Reset WhatsApp sedang diproses' });
+  }
+
+  isResetting = true;
+  isConnected = false;
+  qrCode = null;
+
+  try {
+    if (sock) {
+      await sock.logout().catch(() => {});
+      sock = null;
+    }
+
+    await rm(SESSION_DIR, { recursive: true, force: true });
+    await startWa();
+
+    return res.json({ success: true, message: 'Sesi WhatsApp direset. QR baru sedang dibuat.' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Gagal mereset sesi WhatsApp' });
+  } finally {
+    isResetting = false;
+  }
 });
 
 app.post('/wa/send', async (req, res) => {
@@ -117,7 +146,7 @@ app.get('/wa/qr', async (req, res) => {
   res.json({ qr: qrCode });
 });
 
-app.listen(port, async () => {
+app.listen(port, '127.0.0.1', async () => {
   console.log(`WhatsApp service running on http://localhost:${port}`);
   await startWa();
 });

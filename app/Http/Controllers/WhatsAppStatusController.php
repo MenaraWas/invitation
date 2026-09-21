@@ -17,4 +17,14 @@ class WhatsAppStatusController extends Controller
             'qr' => $data['qr'] ?? null,
         ]);
     }
+
+    public function reset()
+    {
+        $response = Http::timeout(15)->post('http://localhost:3001/wa/reset');
+
+        return back()->with(
+            $response->successful() ? 'success' : 'error',
+            $response->json('message') ?? $response->json('error') ?? 'Gagal mereset WhatsApp.'
+        );
+    }
 }
