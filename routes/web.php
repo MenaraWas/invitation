@@ -8,7 +8,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/wa-status', [WhatsAppStatusController::class, 'index'])->name('wa.status');
+Route::get('/wa-status', [WhatsAppStatusController::class, 'index'])
+    ->middleware('auth')
+    ->name('wa.status');
 Route::post('/wa-status/reset', [WhatsAppStatusController::class, 'reset'])
     ->middleware('auth')
     ->name('wa.status.reset');
