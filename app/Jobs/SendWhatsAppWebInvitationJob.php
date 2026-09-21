@@ -35,7 +35,16 @@ class SendWhatsAppWebInvitationJob implements ShouldQueue
 
         $guest->update(['whatsapp_status' => 'sending']);
 
-        $message = "Halo {$guest->name}, berikut link undangan Anda:\n" . route('invitation.show', $guest->slug);
+        $message = "Yth. Bapak/Ibu/Saudara/i {$guest->name},\n\n"
+            . "Tanpa mengurangi rasa hormat, sehubungan dengan keterbatasan jarak dan waktu, "
+            . "melalui pesan ini kami bermaksud mengundang Bapak/Ibu/Saudara/i untuk hadir dan "
+            . "memberikan doa restu pada acara pernikahan kami:\n\n"
+            . "🔗 Detail & RSVP: " . route('invitation.show', $guest->slug) . "\n"
+            . "Anda mendapatkan formasi kursi sebanyak _*{$guest->seat_count} kursi*_\n\n"
+            . "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i "
+            . "berkenan hadir dengan *mengisikan RSVP yang tersedia*.\n\n"
+            . "Salam hangat,\n"
+            . "Riza & Pierre";
 
         $service = new WhatsAppWebService();
         $response = $service->send($guest->phone, $message);

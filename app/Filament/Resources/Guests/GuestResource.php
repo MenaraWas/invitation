@@ -39,6 +39,14 @@ class GuestResource extends Resource
                 ->tel()
                 ->maxLength(20),
 
+            TextInput::make('seat_count')
+                ->label('Jumlah Kursi')
+                ->numeric()
+                ->integer()
+                ->minValue(1)
+                ->default(1)
+                ->required(),
+
             Select::make('status')
                 ->options([
                     'active' => 'Active',

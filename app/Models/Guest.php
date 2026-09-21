@@ -13,11 +13,19 @@ class Guest extends Model
         'name',
         'slug',
         'phone',
+        'seat_count',
         'token',
         'status',
         'rsvp_status',
         'whatsapp_status',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'seat_count' => 'integer',
+        ];
+    }
 
     public function deviceSession()
     {
