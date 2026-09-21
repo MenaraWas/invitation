@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Guests;
 use App\Filament\Resources\Guests\Pages\CreateGuest;
 use App\Filament\Resources\Guests\Pages\EditGuest;
 use App\Filament\Resources\Guests\Pages\ListGuests;
+use App\Jobs\SendWhatsAppWebInvitationJob;
 use App\Models\Guest;
 use BackedEnum;
 use Filament\Forms\Components\Textarea;
@@ -72,6 +73,15 @@ class GuestResource extends Resource
                     default => 'gray',
                 }),
             Tables\Columns\TextColumn::make('rsvp_status')->badge(),
+            Tables\Columns\TextColumn::make('whatsapp_status')
+                ->label('Status WA')
+                ->badge()
+                ->color(fn(string $state): string => match ($state) {
+                    'queued' => 'warning',
+                    'sent' => 'success',
+                    'failed' => 'danger',
+                    default => 'gray',
+                }),
             Tables\Columns\TextColumn::make('device_status')
                 ->label('Akses Device')
                 ->state(function (Guest $record) {
@@ -89,14 +99,16 @@ class GuestResource extends Resource
                     ->label('Kirim WA')
                     ->icon('heroicon-o-paper-airplane')
                     ->color('success')
-                    ->url(function (Guest $record) {
-                        $link = route('invitation.show', $record->token);
-                        $message = "Halo {$record->name}, berikut undangan pernikahan kami:\n{$link}";
-                        $phone = preg_replace('/[^0-9]/', '', $record->phone);
+                    ->action(function (Guest $record) {
+                        $record->update(['whatsapp_status' => 'queued']);
+                        SendWhatsAppWebInvitationJob::dispatch($record->id);
 
-                        return "https://wa.me/{$phone}?text=" . urlencode($message);
-                    })
-                    ->openUrlInNewTab(),
+                        Notification::make()
+                            ->title('Pesan WA masuk antrian')
+                            ->body("Undangan untuk {$record->name} sedang dikirim.")
+                            ->success()
+                            ->send();
+                    }),
                 Action::make('reset_access')
                     ->label('Reset Akses')
                     ->icon('heroicon-o-arrow-path')
@@ -118,6 +130,32 @@ class GuestResource extends Resource
             ])
 
             ->headerActions([
+                Action::make('login_whatsapp')
+                    ->label('Login WA')
+                    ->icon('heroicon-o-device-phone-mobile')
+                    ->color('info')
+                    ->url(route('wa.status'))
+                    ->openUrlInNewTab(),
+                Action::make('send_whatsapp_batch')
+                    ->label('Kirim WA Batch')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalDescription('Ini akan mengirimkan undangan ke semua tamu aktif yang masih punya nomor WA. Lanjutkan?')
+                    ->action(function () {
+                        $guests = Guest::query()->where('status', 'active')->whereNotNull('phone')->where('phone', '!=', '')->get();
+
+                        foreach ($guests as $guest) {
+                            $guest->update(['whatsapp_status' => 'queued']);
+                            SendWhatsAppWebInvitationJob::dispatch($guest->id);
+                        }
+
+                        Notification::make()
+                            ->title('Batch WA masuk antrian')
+                            ->body('Dikirim ke ' . $guests->count() . ' tamu aktif.')
+                            ->success()
+                            ->send();
+                    }),
                 Action::make('bulk_import')
                     ->label('Import Tamu')
                     ->icon('heroicon-o-arrow-up-tray')
@@ -140,6 +178,7 @@ class GuestResource extends Resource
                                 'name' => trim($parts[0]),
                                 'phone' => trim($parts[1] ?? ''),
                                 'status' => 'active',
+                                'whatsapp_status' => 'pending',
                             ]);
                             $count++;
                         }

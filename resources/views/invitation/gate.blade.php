@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Undangan - {{ $guest->name }}</title>
+    <title>{{ $event_name ?? 'Pernikahan Kami' }} - {{ $guest->name }}</title>
     @vite('resources/css/app.css')
     <style>
         /* Smooth fade transitions */
@@ -35,7 +35,9 @@
 
     {{-- ============ LOADING STATE ============ --}}
     <div id="loading" class="gate-fade is-visible min-h-screen flex items-center justify-center">
-        <div class="text-center">
+        <div class="text-center max-w-md px-6">
+            <p class="text-xs uppercase tracking-[0.25em] text-gray-400 mb-4">{{ $event_name ?? 'Pernikahan Kami' }}</p>
+            <h1 class="text-2xl font-semibold text-gray-800 mb-2">Halo, {{ $guest->name }}</h1>
             <div class="relative w-16 h-16 mx-auto mb-5">
                 {{-- Outer pulsing ring --}}
                 <div class="pulse-ring absolute inset-0 rounded-full border-2 border-gray-200"></div>

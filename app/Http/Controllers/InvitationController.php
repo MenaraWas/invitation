@@ -18,14 +18,19 @@ class InvitationController extends Controller
             return view('invitation.invalid');
         }
 
-        $eventDeadline = InvitationSetting::current()->event_date?->copy()->addDay();
+        $settings = InvitationSetting::current();
+        $eventDeadline = $settings->event_date?->copy()->addDay();
 
         if (!$eventDeadline || now()->greaterThan($eventDeadline)) {
             return view('invitation.expired');
         }
 
         // Render halaman shell, fingerprint dicek lewat AJAX setelah load
-        return view('invitation.gate', compact('guest', 'token'));
+        return view('invitation.gate', [
+            'guest' => $guest,
+            'token' => $token,
+            'event_name' => $settings->event_name ?? 'Pernikahan Kami',
+        ]);
     }
 
     public function verify(Request $request, string $token)
@@ -40,8 +45,8 @@ class InvitationController extends Controller
             return response()->json(['allowed' => false, 'reason' => 'invalid'], 403);
         }
 
-        $eventDeadline = Carbon::parse(config('app.event_date'))->addDay();
-        if (now()->greaterThan($eventDeadline)) {
+        $eventDeadline = InvitationSetting::current()->event_date?->copy()->addDay();
+        if (!$eventDeadline || now()->greaterThan($eventDeadline)) {
             return response()->json(['allowed' => false, 'reason' => 'expired'], 403);
         }
 

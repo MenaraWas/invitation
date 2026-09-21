@@ -15,6 +15,7 @@ class Guest extends Model
         'token',
         'status',
         'rsvp_status',
+        'whatsapp_status',
     ];
 
     public function deviceSession()

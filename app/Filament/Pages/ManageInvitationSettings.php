@@ -29,6 +29,12 @@ class ManageInvitationSettings extends Page implements Forms\Contracts\HasForms
     public function form(Schema $form): Schema
     {
         return $form->components([
+            Forms\Components\TextInput::make('event_name')
+                ->label('Nama Acara / Undangan')
+                ->required()
+                ->maxLength(255)
+                ->helperText('Nama ini akan tampil di halaman gate dan branding undangan.'),
+
             DatePicker::make('event_date')
                 ->label('Tanggal Acara')
                 ->required()
@@ -54,5 +60,10 @@ class ManageInvitationSettings extends Page implements Forms\Contracts\HasForms
         InvitationSetting::current()->update($this->form->getState());
 
         Notification::make()->title('Pengaturan disimpan')->success()->send();
+    }
+
+    public function loginWaAction(): void
+    {
+        redirect()->to(route('wa.status'));
     }
 }
