@@ -11,6 +11,7 @@ class Guest extends Model
     /** @use HasFactory<\Database\Factories\GuestFactory> */
     protected $fillable = [
         'name',
+        'slug',
         'phone',
         'token',
         'status',
@@ -36,6 +37,25 @@ class Guest extends Model
         if (empty($guest->token)) {
             $guest->token = self::generateToken();
         }
+
+        if (empty($guest->slug)) {
+            $guest->slug = self::generateSlug($guest->name);
+        }
     });
+    }
+
+    public static function generateSlug(string $name, ?int $ignoreId = null): string
+    {
+        $base = Str::slug($name) ?: 'tamu';
+        $slug = $base;
+        $counter = 2;
+
+        while (self::where('slug', $slug)
+            ->when($ignoreId, fn ($query) => $query->whereKeyNot($ignoreId))
+            ->exists()) {
+            $slug = $base . '-' . $counter++;
+        }
+
+        return $slug;
     }
 }

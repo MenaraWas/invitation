@@ -30,7 +30,7 @@ class SendWhatsAppInvitationJob implements ShouldQueue
         $guest->update(['whatsapp_status' => 'sending']);
 
         $settings = InvitationSetting::current();
-        $link = route('invitation.show', $guest->token);
+        $link = route('invitation.show', $guest->slug);
         $message = trim(config('services.whatsapp.default_message', 'Halo, berikut undangan kami:') . "\n\n" . $guest->name . "\n" . $link);
 
         $phone = preg_replace('/[^0-9]/', '', $guest->phone);

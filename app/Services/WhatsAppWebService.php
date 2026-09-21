@@ -34,7 +34,12 @@ class WhatsAppWebService
             ];
         }
 
-        $to = preg_replace('/[^0-9]/', '', $phone);
+        $to = preg_replace('/[^0-9]/', '', $phone) ?? '';
+
+        // Baileys requires the international WhatsApp number format.
+        if (str_starts_with($to, '0')) {
+            $to = '62' . ltrim($to, '0');
+        }
 
         if (blank($to) || strlen($to) < 10) {
             return [

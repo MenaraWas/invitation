@@ -10,5 +10,5 @@ Route::get('/', function () {
 
 Route::get('/wa-status', [WhatsAppStatusController::class, 'index'])->name('wa.status');
 
-Route::get('/inv/{token}', [InvitationController::class, 'show'])->name('invitation.show');
-Route::post('/inv/{token}/verify', [InvitationController::class, 'verify'])->name('invitation.verify');
+Route::get('/inv/{identifier}', [InvitationController::class, 'show'])->name('invitation.show');
+Route::post('/inv/{identifier}/verify', [InvitationController::class, 'verify'])->name('invitation.verify');

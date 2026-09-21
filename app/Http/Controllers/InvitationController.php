@@ -11,8 +11,10 @@ use Carbon\Carbon;
 
 class InvitationController extends Controller
 {
-    public function show(string $token){
-        $guest = Guest::where('token', $token)->first();
+    public function show(string $identifier){
+        $guest = Guest::where('slug', $identifier)
+            ->orWhere('token', $identifier)
+            ->first();
 
         if (!$guest || $guest->status === 'revoked') {
             return view('invitation.invalid');
@@ -28,18 +30,20 @@ class InvitationController extends Controller
         // Render halaman shell, fingerprint dicek lewat AJAX setelah load
         return view('invitation.gate', [
             'guest' => $guest,
-            'token' => $token,
+            'token' => $guest->slug,
             'event_name' => $settings->event_name ?? 'Pernikahan Kami',
         ]);
     }
 
-    public function verify(Request $request, string $token)
+    public function verify(Request $request, string $identifier)
     {
         $request->validate([
             'fingerprint' => 'required|string',
         ]);
 
-        $guest = Guest::where('token', $token)->first();
+        $guest = Guest::where('slug', $identifier)
+            ->orWhere('token', $identifier)
+            ->first();
 
         if (!$guest || $guest->status === 'revoked') {
             return response()->json(['allowed' => false, 'reason' => 'invalid'], 403);
